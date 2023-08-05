@@ -1,2 +1,3 @@
-requests==2.31.0
+pyromod==2.0.0
+Kvsqlite==0.2.1
 Pyrogram==2.0.106
