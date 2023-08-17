@@ -5,7 +5,7 @@ import requests
 
 token = "6472955127:AAFKY1qsnFITUZz4klmXG2PpIDDK8eDFw0s"
 
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(token, threaded=True, num_threads=2)
 
 my_id =  int("5832988930") 
 
