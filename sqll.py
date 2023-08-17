@@ -13,11 +13,22 @@ cursor.execute('''
     )
 ''')
 
+# Table channels
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS channels (
+        id INTEGER PRIMARY KEY,
+        type TEXT,
+        blc INTEGER default 0,
+        UNIQUE(id, type)
+    )
+''')
+
 # Table for user settings
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_settings (
         notifications INTEGER,
         login INTEGER,
+        status INTEGER,
         compulsory_subscription TEXT
     )
 ''')
@@ -67,15 +78,62 @@ def unban_uss():
 
 
 
+def insert_channel(channel_id, channel_type):
+    try:
+        cursor.execute(f"INSERT INTO channels (`id`, `type`) VALUES ('{channel_id}', '{channel_type}')")
+        conn.commit()
+    except sqlite3.IntegrityError:
+        # User already exists, do nothing
+        pass
+
+    
+def delete_channel(channel_id):
+        cursor.execute(f"DELETE FROM channels where `id` = '{channel_id}'")
+        conn.commit()
+
+def get_total_channels():
+    cursor.execute("SELECT id FROM channels where `blc` = '0'")
+    return [mms[0] for mms in cursor.fetchall()]
+
+
+def get_total_ch():
+    cursor.execute("SELECT COUNT(*) FROM channels where `type` = 'ch' AND `blc` = '0' ")
+    return cursor.fetchone()[0]
+
+def get_total_gr():
+    cursor.execute("SELECT COUNT(*) FROM channels where `type` = 'gr' AND `blc` = '0'")
+    return cursor.fetchone()[0]
+
+# Job 3: Fetch user information based on user ID
+def get_channel_info(channel_id):
+    cursor.execute(f"SELECT * FROM channels WHERE `id` = '{channel_id}'")
+    return cursor.fetchone()
+
+
+# Job 4: Update user data based on user ID
+def update_channel(channel_id, blc):
+    cursor.execute(f'''
+        UPDATE channels
+        SET `blc` = '{blc}' where `id` = '{channel_id}' ''')
+    conn.commit()
+
+
+def unban_channels():
+    cursor.execute(f'''
+        UPDATE channels
+        SET `blc` = '0' ''')
+    conn.commit()
+
+
 
 if len(cursor.execute("select * from user_settings").fetchall()) == 0:
-    cursor.execute("INSERT INTO user_settings VALUES('1', '1', '0')")
+    cursor.execute("INSERT INTO user_settings VALUES('1', '1', '1', '0')")
     conn.commit()
 
 
 
 # Job 4: Update user data based on user ID
-def update_user_settings(notifications= None, login= None, compulsory_subscription=None):
+def update_user_settings(notifications= None, login= None, status=None, compulsory_subscription=None):
     if not notifications == None:
         cursor.execute(f'''
             UPDATE user_settings
@@ -86,6 +144,12 @@ def update_user_settings(notifications= None, login= None, compulsory_subscripti
         cursor.execute(f'''
             UPDATE user_settings
             SET `login` = '{login}' ''')
+        conn.commit()
+
+    if not status == None:
+        cursor.execute(f'''
+            UPDATE user_settings
+            SET `status` = '{status}' ''')
         conn.commit()
 
     if not compulsory_subscription == None:
@@ -111,4 +175,7 @@ def get_login():
     cursor.execute("SELECT login FROM user_settings")
     return cursor.fetchone()[0]
 
-update_user(2, "blc")
+
+def get_status():
+    cursor.execute("SELECT status FROM user_settings")
+    return cursor.fetchone()[0]

@@ -1,3 +1,4 @@
-pyromod==2.0.0
-Kvsqlite==0.2.1
-Pyrogram==2.0.106
+Flask==2.2.2
+gunicorn==21.2.0
+pyTelegramBotAPI==4.12.0
+requests==2.31.0
